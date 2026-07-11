@@ -9,6 +9,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 use demo_api::app;
+use demo_api::graphql;
 use demo_api::shared::config::Config;
 use demo_api::shared::db;
 use demo_api::shared::state::AppState;
@@ -27,9 +28,11 @@ async fn main() -> anyhow::Result<()> {
     db::run_migrations(&db).await?;
 
     let addr = config.server_addr;
+    let graphql_schema = graphql::build_schema(db.clone());
     let state = AppState {
         db,
         config: Arc::new(config),
+        graphql: graphql_schema,
     };
 
     let router = app::build_router(state);
